@@ -6,7 +6,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
@@ -14,25 +13,32 @@ import java.util.List;
 public class UserDaoImp implements UserDao {
 
 
-   @Autowired
-   private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-   @Override
-   public void add(User user) {
-      sessionFactory.getCurrentSession().save(user);
-   }
+    @Autowired
+    public UserDaoImp(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
-   @Override
-   @SuppressWarnings("unchecked")
-   public List<User> listUsers() {
-      TypedQuery<User> query=sessionFactory.getCurrentSession().createQuery("from User");
-      return query.getResultList();
-   }
+    @Override
+    public void add(User user) {
+        sessionFactory.getCurrentSession().save(user);
+    }
 
-   @Override
-   public List<User> getUserByCar(Car car) {
-      String HQL="FROM User user LEFT OUTER JOIN FETCH user.userCar WHERE user.userCar.model=:model AND user.userCar.series=:series ";
-      Query query = sessionFactory.getCurrentSession().createQuery(HQL).setParameter("model", car.getModel()).setParameter("series",car.getSeries());
-      return  query.getResultList();
-   }
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<User> listUsers() {
+        TypedQuery<User> query = sessionFactory.getCurrentSession().createQuery("from User");
+        return query.getResultList();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<User> getUserByCar(Car car) {
+        String getHql = "FROM User u WHERE u.userCar.model=:model AND u.userCar.series=:series ";
+        TypedQuery<User> query = sessionFactory.getCurrentSession().createQuery(getHql)
+                .setParameter("model", car.getModel())
+                .setParameter("series", car.getSeries());
+        return query.getResultList();
+    }
 }
